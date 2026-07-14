@@ -1,0 +1,12 @@
+{:itonami.blueprint/id "cloud-itonami-isic-6130"
+ :itonami.blueprint/name "Community Satellite Telecommunications Operations"
+ :itonami.blueprint/isic-rev5 "6130"
+ :itonami.blueprint/domain :communication/satellite-network-operator
+ :itonami.blueprint/license "AGPL-3.0-or-later"
+ :itonami.blueprint/social-impact [:connectivity :digital-inclusion :remote-access :disaster-resilience]
+ :itonami.blueprint/governor :satellite-network-governor
+ :itonami.blueprint/robotics true
+ :itonami.blueprint/required-technologies [:robotics :identity :forms :dmn :bpmn :audit-ledger :phone]
+ :itonami.blueprint/optional-technologies [:optimization]
+ :itonami.blueprint/status :public-oss
+ :itonami.blueprint/maturity :implemented}
