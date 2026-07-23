@@ -73,7 +73,16 @@
           :required-evidence ["Teilnehmeridentitätsprüfungsnachweis (subscriber-identity-verification-record)"
                               "Satelliten-Rufnummernzuteilungsnachweis (satellite-number-assignment-record)"
                               "ITU-Koordinierungsanmeldung (itu-coordination-filing-record)"
-                              "Sperrprotokoll (service-suspension-log)"]}})
+                              "Sperrprotokoll (service-suspension-log)"]}
+   "FRA" {:name "France"
+          :owner-authority "Autorité de régulation des communications électroniques, des postes et de la distribution de la presse (Arcep) -- France's competent frequency-assignment authority ('affectataire') for satellite radiocommunication networks, whose authorizations are subject to ITU Radio Regulations coordination"
+          :legal-basis "Code des postes et des communications électroniques (CPCE), notamment ses articles L. 32-1, L. 36-7 (6°), L. 42-1 et R. 20-44-9"
+          :national-spec "Autorisation individuelle d'utilisation de fréquences radioélectriques délivrée par l'Arcep, requise pour établir et exploiter en France tout réseau ouvert au public du service fixe ou mobile par satellite (ex. décision Arcep n° 2022-1102 du 25 mai 2022, modifiée, autorisant Starlink Internet Services Limited) ; le dossier de demande doit inclure le fichier de coordination UIT généré par le logiciel SpaceCap au format .mdb, et l'opérateur reste tenu de respecter le Règlement des radiocommunications de l'UIT"
+          :provenance "https://www.arcep.fr/uploads/tx_gspublication/consultation-modification-autorisation-frequences-Starlink_juin2024.pdf"
+          :required-evidence ["Registre de vérification d'identité des abonnés (subscriber-identity-verification-record)"
+                              "Registre d'attribution des numéros de circuits satellite (satellite-number-assignment-record)"
+                              "Dossier de coordination UIT / SpaceCap (itu-coordination-filing-record)"
+                              "Registre de suspension de service (service-suspension-log)"]}})
 
 (defn spec-basis
   "The jurisdiction's requirement map, or nil -- nil means NO spec-basis,
