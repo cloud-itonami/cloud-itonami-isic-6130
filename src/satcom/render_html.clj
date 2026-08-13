@@ -22,8 +22,11 @@
     - every draft registry record comes from
       `store/provisioning-history` / `store/suspension-history`, i.e.
       from `satcom.registry`;
-    - the rollout-phase table comes from 16 further REAL graph runs
-      (4 ops x 4 phases), not from reading `satcom.phase`'s tables;
+    - the rollout-phase table comes from one further REAL graph run per
+      (write-op x phase) cell -- every op in `satcom.phase/write-ops`,
+      derived rather than listed by hand -- not from reading
+      `satcom.phase`'s tables, and the paragraph above that table
+      states what those runs measured rather than asserting a rule;
     - the approver-attribution table is DERIVED by probing the store
       for a retained approver key (see `approver-in`), so it reports
       what this store actually does today rather than a hardcoded
@@ -33,9 +36,11 @@
   seed are byte-identical (verified by diffing two runs).
 
   `-main` THROWS if the real governor produced zero HARD
-  `:governor-hold` facts, and again if any rule that did fire is
-  missing from the rendered document. A demo whose compliance layer
-  silently stopped firing must not be publishable.
+  `:governor-hold` facts, if any rule that did fire is missing from the
+  rendered document, or if any op declared in `satcom.phase/write-ops`
+  was never measured by the phase probe. A demo whose compliance layer
+  silently stopped firing -- or whose action gate quietly stopped
+  covering an op -- must not be publishable.
 
   Usage: `clojure -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
@@ -152,22 +157,29 @@
     {:db db :runs @runs}))
 
 (defn phase-probe!
-  "16 further REAL graph runs: four ops x the four rollout phases
-  declared in `satcom.phase/phases`. Each cell gets its OWN freshly
-  seeded store, set up at the default phase (intake + an approved
-  identity verification, so the evidence gate is satisfied and the
-  phase gate is what the probe is actually measuring), and then runs
-  ONE op under a context pinned to that phase.
+  "One REAL graph run per (write-op x rollout-phase) cell: EVERY op in
+  `satcom.phase/write-ops` against every phase declared in
+  `satcom.phase/phases`. Each cell gets its OWN freshly seeded store,
+  set up at the default phase (intake + an approved identity
+  verification, so the evidence gate is satisfied and the phase gate is
+  what the probe is actually measuring), and then runs ONE op under a
+  context pinned to that phase.
+
+  The op list is DERIVED from `phase/write-ops` rather than written out
+  here. A literal list silently omits any op added to the actor later:
+  this probe used to name four ops by hand and so never measured
+  `:actuation/suspend-service` at all -- one of the two real-world
+  actuations was missing from the published action gate while the page
+  still looked complete.
 
   This is measured, not read off `satcom.phase`'s tables -- which is
-  the point: it is what makes the row for `:actuation/provision-
-  capacity` at phase 3 (escalate, never commit) evidence rather than a
-  restatement of the comment above the table."
+  the point: it is what makes the `:actuation/*` rows at the most
+  permissive phase evidence rather than a restatement of the comment
+  above the table."
   []
   (vec
    (for [ph (sort (keys phase/phases))
-         probe-op [:terminal/intake :identity/verify :coordination/screen
-                   :actuation/provision-capacity]]
+         probe-op (sort phase/write-ops)]
      (let [db (store/seed-db)
            actor (op/build db)
            patch (select-keys (store/terminal db "term-1") [:id :holder-name])]
@@ -472,15 +484,50 @@
                    (esc (get r "jurisdiction"))
                    (yn (get r "immutable") "ok" "muted" "true" "false")))))))
 
+(defn- op-list
+  "`:a/b, :c/d` as escaped inline code, in a stable order."
+  [ops]
+  (str/join ", " (map #(str "<code>" (esc %) "</code>") (sort ops))))
+
+(defn- phase-findings
+  "What the probe ACTUALLY measured about auto-commit, as a sentence.
+
+  Derived on purpose. The hardcoded predecessor of this paragraph
+  asserted that `:actuation/provision-capacity` escalates even at the
+  most permissive phase and that no phase ever auto-commits a
+  real-world act. Both happen to be true today — but they are claims
+  about `satcom.phase`'s tables, and the moment someone adds an
+  actuation to a phase's `:auto` set the table below would say
+  `auto-commit` while the prose above it still denied it. This reads
+  the answer off the same runs the table is rendered from, so the two
+  cannot disagree."
+  [probe]
+  (let [max-phase (apply max (map :phase probe))
+        top (filter #(= max-phase (:phase %)) probe)
+        top-label (:label (first top))
+        auto-at-top (map :op (filter #(= :commit (:disposition %)) top))
+        ever-auto (set (map :op (filter #(= :commit (:disposition %)) probe)))
+        never-auto (remove ever-auto (distinct (map :op probe)))]
+    (str "<strong>Measured across these runs:</strong> at the most permissive phase this "
+         "actor has (<span class=\"num\">" (esc max-phase) "</span>, " (esc top-label) ") "
+         (if (seq auto-at-top)
+           (str "only " (op-list auto-at-top) " auto-commits")
+           "no op auto-commits at all")
+         ". "
+         (if (seq never-auto)
+           (str (op-list never-auto) " reached no auto-commit at ANY phase measured — "
+                "each either escalated to a human or was held.")
+           "Every op measured auto-committed at some phase."))))
+
 (defn- phase-section [probe]
   (section
    (str "Rollout phase gate — " (count probe) " measured runs")
-   (str "One freshly seeded store per cell, set up with an approved identity verification so "
+   (str "Every op in <code>satcom.phase/write-ops</code> against every declared phase: one "
+        "freshly seeded store per cell, set up with an approved identity verification so "
         "the evidence gate is satisfied, then a single op run under a context pinned to that "
         "phase. These dispositions are MEASURED, not read off <code>satcom.phase</code>'s "
-        "tables — which is what makes the bottom row evidence: "
-        "<code>:actuation/provision-capacity</code> escalates to a human even at phase 3, "
-        "the most permissive phase this actor has. No phase ever auto-commits a real-world act.")
+        "tables. "
+        (phase-findings probe))
    (table ["Phase" "Label" "Op" "Disposition" "Reason"]
           (for [{:keys [phase label op disposition reason]} probe]
             (row (str "<span class=\"num\">" phase "</span>")
@@ -559,6 +606,33 @@
                    ". The page and the run must agree.")
               {:missing-rules (vec missing)})))))
 
+(defn- assert-action-gate-complete!
+  "Build-time invariant: the published action gate must cover EVERY op
+  the actor can write with, at every declared phase.
+
+  This exists because the probe previously named its ops in a literal
+  vector and quietly omitted `:actuation/suspend-service` -- half of
+  this actor's real-world actuation surface was missing from the page
+  while the page still read as a complete gate. An op that is never
+  measured must not be able to disappear silently again."
+  [probe]
+  (let [measured (set (map :op probe))
+        missing (remove measured phase/write-ops)
+        expected (* (count phase/write-ops) (count phase/phases))]
+    (when (seq missing)
+      (throw (ex-info
+              (str "REFUSING to write operator-console.html: these ops are declared in "
+                   "satcom.phase/write-ops but were never measured by the phase probe: "
+                   (pr-str (vec (sort missing)))
+                   ". An unmeasured op must not be published as a gated one.")
+              {:unmeasured-ops (vec (sort missing))})))
+    (when (not= expected (count probe))
+      (throw (ex-info
+              (str "REFUSING to write operator-console.html: expected " expected
+                   " probe cells (" (count phase/write-ops) " write-ops x "
+                   (count phase/phases) " phases) but got " (count probe) ".")
+              {:expected expected :actual (count probe)})))))
+
 (defn -main [& args]
   (let [out (or (first args) "docs/samples/operator-console.html")
         result (run-demo!)
@@ -566,6 +640,7 @@
         holds (hard-holds (:db result))
         html (render result probe)]
     (assert-hard-holds! holds html)
+    (assert-action-gate-complete! probe)
     (.mkdirs (.getParentFile (java.io.File. ^String out)))
     (spit out html)
     (println "wrote" out

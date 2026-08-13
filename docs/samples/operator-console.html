@@ -2533,27 +2533,31 @@ img,svg { max-width: 100%; height: auto; }
     </table>
   </section>
   <section class="card">
-    <h2>Rollout phase gate — 16 measured runs</h2>
-    <p class="muted">One freshly seeded store per cell, set up with an approved identity verification so the evidence gate is satisfied, then a single op run under a context pinned to that phase. These dispositions are MEASURED, not read off <code>satcom.phase</code>'s tables — which is what makes the bottom row evidence: <code>:actuation/provision-capacity</code> escalates to a human even at phase 3, the most permissive phase this actor has. No phase ever auto-commits a real-world act.</p>
+    <h2>Rollout phase gate — 20 measured runs</h2>
+    <p class="muted">Every op in <code>satcom.phase/write-ops</code> against every declared phase: one freshly seeded store per cell, set up with an approved identity verification so the evidence gate is satisfied, then a single op run under a context pinned to that phase. These dispositions are MEASURED, not read off <code>satcom.phase</code>'s tables. <strong>Measured across these runs:</strong> at the most permissive phase this actor has (<span class="num">3</span>, supervised-auto) only <code>:terminal/intake</code> auto-commits. <code>:actuation/provision-capacity</code>, <code>:actuation/suspend-service</code>, <code>:coordination/screen</code>, <code>:identity/verify</code> reached no auto-commit at ANY phase measured — each either escalated to a human or was held.</p>
     <table>
       <thead><tr><th>Phase</th><th>Label</th><th>Op</th><th>Disposition</th><th>Reason</th></tr></thead>
       <tbody>
-        <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:terminal/intake</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
-        <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:identity/verify</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
-        <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:coordination/screen</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
         <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:actuation/provision-capacity</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
-        <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:terminal/intake</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
-        <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:identity/verify</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
-        <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:coordination/screen</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:actuation/suspend-service</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:coordination/screen</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:identity/verify</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">0</span></td><td>read-only</td><td><code>:terminal/intake</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
         <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:actuation/provision-capacity</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
-        <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:terminal/intake</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
-        <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:identity/verify</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
-        <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:coordination/screen</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
+        <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:actuation/suspend-service</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:coordination/screen</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:identity/verify</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">1</span></td><td>assisted-intake</td><td><code>:terminal/intake</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
         <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:actuation/provision-capacity</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
-        <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:terminal/intake</code></td><td><span class="ok">auto-commit</span></td><td><span class="muted">—</span></td></tr>
-        <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:identity/verify</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
-        <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:coordination/screen</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
+        <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:actuation/suspend-service</code></td><td><span class="critical">hold</span></td><td><code>phase-disabled</code></td></tr>
+        <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:coordination/screen</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
+        <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:identity/verify</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
+        <tr><td><span class="num">2</span></td><td>assisted-verify</td><td><code>:terminal/intake</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
         <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:actuation/provision-capacity</code></td><td><span class="warn">escalate to human</span></td><td><code>actuation</code></td></tr>
+        <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:actuation/suspend-service</code></td><td><span class="warn">escalate to human</span></td><td><code>actuation</code></td></tr>
+        <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:coordination/screen</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
+        <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:identity/verify</code></td><td><span class="warn">escalate to human</span></td><td><code>phase-approval</code></td></tr>
+        <tr><td><span class="num">3</span></td><td>supervised-auto</td><td><code>:terminal/intake</code></td><td><span class="ok">auto-commit</span></td><td><span class="muted">—</span></td></tr>
       </tbody>
     </table>
   </section>
