@@ -44,7 +44,7 @@
 
   Usage: `clojure -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
-  (:require [clojure.string :as str]
+  (:require [kotoba.lang.text :as str]
             [jp-go-dds.skin :as skin]
             [langgraph.graph :as g]
             [satcom.facts :as facts]
@@ -216,7 +216,7 @@
   (when (map? m)
     (some (fn [[k v]]
             (let [n (-> (if (keyword? k) (name k) (str k))
-                        (str/lower-case)
+                        (str/lower)
                         (str/replace "_" "-"))]
               (when (contains? #{"approved-by" "approver" "approved-by-id"} n) v)))
           m)))

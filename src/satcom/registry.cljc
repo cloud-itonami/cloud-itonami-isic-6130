@@ -35,7 +35,7 @@
   provisioning the capacity or suspending the service itself (that is
   `satcom.operation`'s `:actuation/provision-capacity`/`:actuation/
   suspend-service`, always human-gated -- see README `Actuation`)."
-  (:require [clojure.string :as str]))
+  (:require [kotoba.lang.text :as str]))
 
 (defn- unsigned-certificate
   "Every certificate this actor produces is UNSIGNED -- signature is the
@@ -79,7 +79,7 @@
     (throw (ex-info "capacity-provisioning: jurisdiction required" {})))
   (when (< sequence 0)
     (throw (ex-info "capacity-provisioning: sequence must be >= 0" {})))
-  (let [provisioning-number (str (str/upper-case jurisdiction) "-CAP-" (zero-pad sequence 6))
+  (let [provisioning-number (str (str/upper jurisdiction) "-CAP-" (zero-pad sequence 6))
         record {"record_id" provisioning-number
                 "kind" "capacity-provisioning-draft"
                 "terminal_id" terminal-id
@@ -109,7 +109,7 @@
     (throw (ex-info "service-suspension: jurisdiction required" {})))
   (when (< sequence 0)
     (throw (ex-info "service-suspension: sequence must be >= 0" {})))
-  (let [suspension-number (str (str/upper-case jurisdiction) "-SUS-" (zero-pad sequence 6))
+  (let [suspension-number (str (str/upper jurisdiction) "-SUS-" (zero-pad sequence 6))
         record {"record_id" suspension-number
                 "kind" "service-suspension-draft"
                 "terminal_id" terminal-id
