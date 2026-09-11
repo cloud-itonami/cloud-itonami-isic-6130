@@ -93,7 +93,7 @@ construction.** Two independent layers enforce this (`satcom.
 governor`'s `:actuation/provision-capacity`/`:actuation/suspend-
 service` high-stakes gate and `satcom.phase`'s phase table, which
 never puts either op in any phase's `:auto` set) -- see `satcom.
-phase`'s docstring and `test/satcom/phase_test.clj`'s
+phase`'s docstring and `test/satcom/phase_test.cljk`'s
 `provision-capacity-never-auto-at-any-phase`/`suspend-service-never-
 auto-at-any-phase`. The actor may draft, check and recommend; a human
 network operator is always the one who actually provisions capacity or
@@ -203,14 +203,14 @@ subscriber-management and robot-dispatch backends.
 
 | File | Role |
 |---|---|
-| `src/satcom/store.cljc` | **Store** protocol -- `MemStore` ‖ `DatomicStore` (`langchain.db`) + append-only audit ledger + separate capacity-provisioning/service-suspension history. Both actuation ops act directly on a pre-seeded terminal, and the double-actuation guards check dedicated `:capacity-provisioned?`/`:service-suspended?` booleans rather than a `:status` value |
-| `src/satcom/registry.cljc` | Capacity-provisioning + service-suspension draft records, plus `satellite-number-invalid-format?` (the THIRD application of this fleet's format/syntactic-validity check family, after `telecom.registry/e164-invalid-format?` [`6190`] and `wirelesstelecom.registry/msisdn-invalid-format?` [`6120`]) |
-| `src/satcom/facts.cljc` | Per-jurisdiction satellite-licensing + ITU-coordination catalog with an official spec-basis citation per entry, honest coverage reporting |
-| `src/satcom/satcomadvisor.cljc` | **Satellite Operations Advisor** -- `mock-advisor` ‖ `llm-advisor`; intake/verification/coordination-dispute-screening/capacity-provisioning/service-suspension proposals |
-| `src/satcom/governor.cljc` | **Satellite Network Governor** -- 4 HARD checks (spec-basis · evidence-incomplete · satellite-number-format-invalid, pure ground-truth structural recompute · coordination-dispute-unresolved, unconditional evaluation) + already-provisioned/already-suspended guards + 1 soft (confidence/actuation gate) |
-| `src/satcom/phase.cljc` | **Phase 0→3** -- read-only → assisted intake → assisted verify → supervised (both capacity provisioning and service suspension always human; terminal intake is the ONLY auto-eligible op, no direct capital risk) |
-| `src/satcom/operation.cljc` | **OperationActor** -- langgraph-clj StateGraph |
-| `src/satcom/sim.cljc` | demo driver |
+| `src/satcom/store.cljk` | **Store** protocol -- `MemStore` ‖ `DatomicStore` (`langchain.db`) + append-only audit ledger + separate capacity-provisioning/service-suspension history. Both actuation ops act directly on a pre-seeded terminal, and the double-actuation guards check dedicated `:capacity-provisioned?`/`:service-suspended?` booleans rather than a `:status` value |
+| `src/satcom/registry.cljk` | Capacity-provisioning + service-suspension draft records, plus `satellite-number-invalid-format?` (the THIRD application of this fleet's format/syntactic-validity check family, after `telecom.registry/e164-invalid-format?` [`6190`] and `wirelesstelecom.registry/msisdn-invalid-format?` [`6120`]) |
+| `src/satcom/facts.cljk` | Per-jurisdiction satellite-licensing + ITU-coordination catalog with an official spec-basis citation per entry, honest coverage reporting |
+| `src/satcom/satcomadvisor.cljk` | **Satellite Operations Advisor** -- `mock-advisor` ‖ `llm-advisor`; intake/verification/coordination-dispute-screening/capacity-provisioning/service-suspension proposals |
+| `src/satcom/governor.cljk` | **Satellite Network Governor** -- 4 HARD checks (spec-basis · evidence-incomplete · satellite-number-format-invalid, pure ground-truth structural recompute · coordination-dispute-unresolved, unconditional evaluation) + already-provisioned/already-suspended guards + 1 soft (confidence/actuation gate) |
+| `src/satcom/phase.cljk` | **Phase 0→3** -- read-only → assisted intake → assisted verify → supervised (both capacity provisioning and service suspension always human; terminal intake is the ONLY auto-eligible op, no direct capital risk) |
+| `src/satcom/operation.cljk` | **OperationActor** -- langgraph-clj StateGraph |
+| `src/satcom/sim.cljk` | demo driver |
 | `test/satcom/*_test.clj` | governor contract · phase invariants · store parity · registry conformance · facts coverage |
 
 ## Business-process coverage (honest)
