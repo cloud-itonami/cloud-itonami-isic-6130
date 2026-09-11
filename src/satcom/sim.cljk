@@ -1,5 +1,5 @@
 (ns satcom.sim
-  "Demo driver -- `clojure -M:dev:run`. Walks a clean terminal through
+  "Demo driver -- `kbb -M:dev:run`. Walks a clean terminal through
   intake -> identity verification -> ITU-coordination-dispute
   screening -> capacity-provisioning proposal (always escalates) ->
   human approval -> commit, then through service-suspension proposal
