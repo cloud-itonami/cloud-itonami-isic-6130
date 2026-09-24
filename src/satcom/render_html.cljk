@@ -44,7 +44,7 @@
 
   Usage: `kbb -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
-  (:require [kotoba.lang.text :as str]
+  (:require [kotoba.io :as kio] [kotoba.lang.text :as str]
             [jp-go-dds.skin :as skin]
             [langgraph.graph :as g]
             [satcom.facts :as facts]
@@ -641,7 +641,7 @@
         html (render result probe)]
     (assert-hard-holds! holds html)
     (assert-action-gate-complete! probe)
-    (.mkdirs (.getParentFile (java.io.File. ^String out)))
+    (kio/mkdirs (kio/parent-file (kio/file ^String out)))
     (spit out html)
     (println "wrote" out
              (str "(" (count (store/ledger (:db result))) " ledger facts, "
