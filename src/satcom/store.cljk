@@ -34,7 +34,7 @@
   immutable log -- the audit trail a community trusting a satellite
   operator needs, and the evidence an operator needs if a provisioning
   or suspension decision is later disputed."
-  (:require #?(:clj  [clojure.edn :as edn]
+  (:require #?(:clj  [kotoba.lang.edn :as edn]
                :cljs [cljs.reader :as edn])
             [satcom.registry :as registry]
             [langchain.db :as d]))
