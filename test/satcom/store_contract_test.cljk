@@ -6,7 +6,7 @@
   `telecom.store-contract-test` and `cloud-itonami-isic-6120`'s
   `wirelesstelecom.store-contract-test` for the same pattern on sibling
   actors."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [satcom.store :as store]))
 
 (defn- backends []
