@@ -1,0 +1,35 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:dev:physics` runs it.
+;;
+;; README "Robotics premise": for a satellite telecommunications operator
+;; (ISIC 6130) robots do VSAT dish/terminal installation, antenna alignment
+;; and remote-site maintenance, gated by the independent Satellite Network
+;; Governor. Physical work modelled here: an installer arm seating a VSAT
+;; reflector on its mount, and a tracked carrier bringing the dish kit up
+;; the unpaved access track of a remote site.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isic-6130"
+ :cases
+ [{:id :vsat-reflector-to-mount
+   :kind :manipulator
+   :procedure "installer arm lifts a VSAT reflector from the carrier bed and seats it on the azimuth/elevation mount"
+   :params {:l1-m 0.90 :l2-m 0.80 :m1-kg 14.0 :m2-kg 10.0
+            :from [1.00 -0.10] :to [0.50 1.10] :duration-s 3.0 :steps 500}
+   :sweep {:param :payload-kg :values [8.0 15.0 22.0 30.0 40.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 550.0 :basis "estimate: continuous shoulder torque of a ~25 kg-payload field arm class"}
+   :boundary {:lo 1.0 :hi 120.0}}
+  {:id :remote-site-access-track
+   :kind :transport
+   :procedure "tracked carrier brings the dish, mount and cable kit (120 kg) 300 m up the unpaved access track to the remote site"
+   :params {:mass-kg 180.0 :payload-kg 120.0 :distance-m 300.0 :v-max-mps 1.2 :a-max-mps2 0.4
+            :brake-decel-mps2 1.0 :drive-force-n 1200.0 :crr 0.08
+            :cog-height-m 0.45 :support-half-length-m 0.55 :payload-cog-height-m 0.80
+            :max-time-s 3600.0}
+   :sweep {:param :slope-deg :values [0.0 5.0 10.0 15.0 18.0]}
+   :quantity :cycle-time-s
+   :limit {:max 300.0 :basis "estimate: one access-track leg within a 5-minute budget of the site visit plan"}
+   :boundary {:lo 0.0 :hi 25.0}}]}
